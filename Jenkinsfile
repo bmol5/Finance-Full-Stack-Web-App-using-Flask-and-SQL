@@ -14,7 +14,7 @@ pipeline {
      }
    }
 
-    stage ('Staging init') {
+    stage ('Terraform init') {
       agent{label 'terrage'}
       steps {
         withCredentials([string(credentialsId: 'AWS_ACCESS_KEY', variable: 'aws_access_key'), 
@@ -25,75 +25,33 @@ pipeline {
          }
       }
   }  
-     stage('Staging Plan') {
+     stage('Terraform Plan') {
       agent{label 'terrage'}   
       steps {
         withCredentials([string(credentialsId: 'AWS_ACCESS_KEY', variable: 'aws_access_key'), 
                         string(credentialsId: 'AWS_SECRET_KEY', variable: 'aws_secret_key')]) {
                             dir('Staging_Terra') {
-                              sh 'terraform plan -var="aws_access_key=$aws_access_key" -var="aws_secret_key=$aws_secret_key" -target=aws_vpc.finance-vpc -target=aws_instance.MySQL_Server -target=aws_subnet.subnet1 -target=aws_subnet.pri_subnet1 -target=aws_subnet.subnet2 -target=aws_subnet.pri_subnet2 -target=aws_internet_gateway.gw1 -target=aws_route_table.route_table1 -target=aws_route_table_association.route-subnet1 -target=aws_db_instance.financedb -target=aws_db_subnet_group.mysql_subnet_group' 
+                              sh 'terraform plan -out plan.tfplan -var="aws_access_key=$aws_access_key" -var="aws_secret_key=$aws_secret_key"'
+                            
                             }
          }
     }
    }
-     stage('Staging Apply') {
+     stage('Terraform Apply') {
       agent{label 'terrage'}
       steps {
         withCredentials([string(credentialsId: 'AWS_ACCESS_KEY', variable: 'aws_access_key'), 
                         string(credentialsId: 'AWS_SECRET_KEY', variable: 'aws_secret_key')]) {
                             dir('Staging_Terra') {
 
-                              sh 'terraform apply -auto-approve -var="aws_access_key=$aws_access_key" -var="aws_secret_key=$aws_secret_key" -target=aws_vpc.finance-vpc -target=aws_instance.MySQL_Server -target=aws_subnet.subnet1 -target=aws_subnet.pri_subnet1 -target=aws_subnet.subnet2 -target=aws_subnet.pri_subnet2 -target=aws_internet_gateway.gw1 -target=aws_route_table.route_table1 -target=aws_route_table_association.route-subnet1 -target=aws_db_instance.financedb -target=aws_db_subnet_group.mysql_subnet_group' 
+                              sh 'terraform apply plan.tfplan' 
+                            
                             }
          }
        }
       }
-
-     stage('Variables Add') {
-       agent{label 'terrage'}
-       steps {
-        withCredentials([string(credentialsId: 'AWS_ACCESS_KEY', variable: 'aws_access_key'),
-                        string(credentialsId: 'API_KEY', variable: 'API_KEY'), 
-                        string(credentialsId: 'AWS_SECRET_KEY', variable: 'aws_secret_key')]) {
-                        dir('Staging_Terra') {
-
-                              sh '''#!/bin/bash
-                              set -x
-                              echo "${API_KEY}" >> outputs.txt
-                              USER=$(terraform output -raw mysql_username)
-                              PASSWORD=$(terraform output -raw mysql_password)
-                              ENDPOINT=$(terraform output -raw mysql_host)
-                              DATABASE=$(terraform output -raw mysql_database_name) 
-                              DB_URI="mysql://${USER}:${PASSWORD}@${ENDPOINT}/${DATABASE}"
-                              echo "${DB_URI}" >> ./outputs.txt
-                              sed '2!d' < ./outputs.txt
-                              sed '3!d' < ./outputs.txt
-                              cat outputs.txt
-                              '''
-                            }         
-      
-       }
-      }
-     }      
-   
-     stage('Variables Apply') {
-      agent{label 'terrage'}
-      steps {
-        withCredentials([string(credentialsId: 'AWS_ACCESS_KEY', variable: 'aws_access_key'), 
-                        string(credentialsId: 'AWS_SECRET_KEY', variable: 'aws_secret_key')]) {
-                            dir('Staging_Terra') {
-
-                              sh '''#!/bin/bash
-                                  terraform plan -target=aws_instance.Web_Server -var="aws_access_key=$aws_access_key" -var="aws_secret_key=$aws_secret_key" 
-                                  terraform apply -auto-approve -target=aws_instance.Web_Server -var="aws_access_key=$aws_access_key" -var="aws_secret_key=$aws_secret_key" 
-                                  '''
-                            }
-         }
-       }
-      }
-
   
-  stage('Destroy') {
+  stage('Terraform Destroy') {
       agent{label 'terrage'}
       steps {
         withCredentials([string(credentialsId: 'AWS_ACCESS_KEY', variable: 'aws_access_key'),
