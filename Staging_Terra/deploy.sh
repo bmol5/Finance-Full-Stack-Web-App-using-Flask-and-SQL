@@ -14,10 +14,6 @@ sudo apt-get -y install libmysqlclient-dev
 pip3 install flask-mysqldb
 pip install -r requirements.txt
 export FLASK_APP=application
-USER=${USER}
-PASSWORD=${PASSWORD}
-ENDPOINT=${PASSWORD}
-DATABASE=${DATABASE}
 API_KEY=${API_KEY}
 DB_URI="mysql://${USER}:${PASSWORD}@${ENDPOINT}/${DATABASE}"
 export DB_URI=$${DB_URI}
