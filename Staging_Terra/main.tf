@@ -17,22 +17,21 @@ resource "aws_vpc" "finance-vpc" {
 }
 
 
-#Creating scripts to be read
-data "template_cloudinit_config" "scripts" {
-    gzip = true
-    base64_encode = true
-
-    part{
-        content_type = "text/x-shellscript"
-        content = "${file("deploy.sh")}"
-    }
-  
-    part{
-        content_type = "text/x-shellscript"
-        content = "${file("env.sh")}"
-    }
+#Creating template file to be read
+data "template_file" "rds" {
+  template = "${file("deploy.sh")}"
+  vars = {
+    ENDPOINT = aws_db_instance.financedb.endpoint
+    USER = aws_db_instance.financedb.username
+    PASSWORD = aws_db_instance.financedb.password
+    DATABASE = aws_db_instance.financedb.db_name
+    API_KEY= var.API_KEY
+  }
+  depends_on = [
+    aws_db_instance.financedb,
+    aws_db_subnet_group.mysql_subnet_group,
+  ]
 }
-
 
 
 #INSTANCES
@@ -41,13 +40,18 @@ resource "aws_instance" "Web_Server" {
   instance_type          = "t2.micro"
   subnet_id              = aws_subnet.subnet1.id
   vpc_security_group_ids = [aws_security_group.web_ssh.id]
-  user_data = "${file("deploy.sh")}"
+  user_data = data.template_file.rds.rendered
   
   key_name = "KuraG5Key"
  
   tags = {
     "Name" : "Web_Server"
   }
+
+  depends_on = [
+    aws_db_instance.financedb,
+    aws_db_subnet_group.mysql_subnet_group,
+  ]
 }
 
 
