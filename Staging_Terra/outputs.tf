@@ -9,6 +9,7 @@ output "mysql_host" {
 
 output "mysql_username" {
   value = aws_db_instance.financedb.username
+  sensitive = true
 }
 
 output "mysql_password" {
