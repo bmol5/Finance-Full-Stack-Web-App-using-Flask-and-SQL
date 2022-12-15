@@ -28,20 +28,34 @@ resource "aws_ecs_task_definition" "aws-ecs-task" {
 
   container_definitions = <<EOF
   [
-  {
-      "name": "finance-container",
-      "image": "suborna/finance_app:v2",
-      "logConfiguration": {
-        "logDriver": "awslogs",
-        "options": {
-          "awslogs-group": "/ecs/finance-logs",
-          "awslogs-region": "us-east-1",
-          "awslogs-stream-prefix": "ecs"
-        }
-      },
-      "portMappings": [
+    {
+        "name": "finance-container",
+        "image": "suborna/finance_app:v2",
+        "logConfiguration": {
+          "logDriver": "awslogs",
+          "options": {
+            "awslogs-group": "/ecs/finance-logs",
+            "awslogs-region": "us-east-1",
+            "awslogs-stream-prefix": "ecs"
+          }
+        },
+        "portMappings": [
+          {
+            "containerPort": 5000
+          }
+        ]
+    },
+    {
+      "name": "datadog-agent",
+      "image": "datadog/agent:latest",
+      "environment": [
         {
-          "containerPort": 5000
+          "name": "DD_API_KEY",
+          "value": "f14a419f4854b57b3f626865c2ae12763f2cfa31"
+        },
+        {
+          "name": "ECS_FARGATE",
+          "value": "true"
         }
       ]
     }
