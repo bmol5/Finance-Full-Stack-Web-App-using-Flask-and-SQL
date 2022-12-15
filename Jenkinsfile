@@ -56,9 +56,10 @@ pipeline {
       agent{label 'terrage'}
       steps {
         withCredentials([string(credentialsId: 'AWS_ACCESS_KEY', variable: 'aws_access_key'),
+        string(credentialsId: 'API_KEY', variable: 'API_KEY'),
         string(credentialsId: 'AWS_SECRET_KEY', variable: 'aws_secret_key')]) {
         dir('Staging_Terra') {
-        sh 'terraform destroy -auto-approve -var="aws_access_key=$aws_access_key" -var="aws_secret_key=$aws_secret_key"'
+        sh 'terraform destroy -auto-approve -var="aws_access_key=$aws_access_key" -var="aws_secret_key=$aws_secret_key" -var="API_KEY"=$API_KEY'
       }
     }
   }
