@@ -7,10 +7,6 @@ output "mysql_host" {
   value = aws_db_instance.financedb.address
 }
 
-output "mysql_port" {
-  value = aws_db_instance.financedb.port
-}
-
 output "mysql_username" {
   value = aws_db_instance.financedb.username
 }
@@ -22,5 +18,6 @@ output "mysql_password" {
 
 output "mysql_database_name" {
   value     = aws_db_instance.financedb.db_name
+  sensitive = true
 }
 

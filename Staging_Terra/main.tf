@@ -137,8 +137,8 @@ resource "aws_db_instance" "financedb" {
   engine_version         = "8.0.28"
   instance_class         = "db.t2.micro"
   db_name                = "financedb"
-  username               = "admin"
-  password               = "Password123!"
+  username               = local.db_creds.username
+  password               = local.db_creds.password
   parameter_group_name   = "default.mysql8.0"
   port                   = 3306
   availability_zone      = "us-east-1a"
@@ -148,10 +148,24 @@ resource "aws_db_instance" "financedb" {
   skip_final_snapshot    = true
 }
 
+#Subnet for RDS
 resource "aws_db_subnet_group" "mysql_subnet_group" {
     name = "mysqlsubnetgroup"
     subnet_ids = [aws_subnet.pri_subnet1.id,aws_subnet.pri_subnet2.id]
 }
+
+#Secret credentials
+data "aws_secretsmanager_secret_version" "creds" {
+  secret_id = "db-creds"
+}
+
+#Parsing credentials
+locals {
+  db_creds = jsondecode(
+    data.aws_secretsmanager_secret_version.creds.secret_string
+  )
+}
+
 
 # DATA
 data "aws_availability_zones" "available" {
