@@ -52,18 +52,18 @@ pipeline {
        }
       }
   
-  stage('Terraform Destroy') {
-      agent{label 'terrage'}
-      steps {
-        withCredentials([string(credentialsId: 'AWS_ACCESS_KEY', variable: 'aws_access_key'),
-        string(credentialsId: 'API_KEY', variable: 'API_KEY'),
-        string(credentialsId: 'AWS_SECRET_KEY', variable: 'aws_secret_key')]) {
-        dir('Staging_Terra') {
-        sh 'terraform destroy -auto-approve -var="aws_access_key=$aws_access_key" -var="aws_secret_key=$aws_secret_key" -var="API_KEY"=$API_KEY'
-      }
-    }
-  }
-  }
+  // stage('Terraform Destroy') {
+  //     agent{label 'terrage'}
+  //     steps {
+  //       withCredentials([string(credentialsId: 'AWS_ACCESS_KEY', variable: 'aws_access_key'),
+  //       string(credentialsId: 'API_KEY', variable: 'API_KEY'),
+  //       string(credentialsId: 'AWS_SECRET_KEY', variable: 'aws_secret_key')]) {
+  //       dir('Staging_Terra') {
+  //       sh 'terraform destroy -auto-approve -var="aws_access_key=$aws_access_key" -var="aws_secret_key=$aws_secret_key" -var="API_KEY"=$API_KEY'
+  //     }
+  //   }
+  // }
+  // }
 
    /*
     stage ('test') {
@@ -82,56 +82,14 @@ pipeline {
        
       }
     }
+
+    
     stage ('e2e tests - cypress') {
       steps {
 
       }
     }
 
-
-
-    stage ('Create Image') {
-      agent{label 'REPLACE_LABEL'}
-      steps {
-
-      }
-    }
-
-    stage ('Push to Dockerhub') {
-      agent{label 'REPLACE_LABEL'}
-      steps {
-
-      }
-    }
-
-    stage ('TF-init') {
-      agent{label 'REPLACE_LABEL'}
-      steps {
-
-      }
-    }
-
-    stage ('TF-plan') {
-      agent{label 'REPLACE_LABEL'}
-      steps {
-
-      }
-    }
-
-    stage ('TF-apply') {
-      agent{label 'REPLACE_LABEL'}
-      steps {
-
-      }
-    }
-
-    stage ('TF-destroy') {
-      agent{label 'REPLACE_LABEL'}
-      steps {
-
-      }
-    }
-    */
 
     
   }
