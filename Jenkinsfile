@@ -83,7 +83,7 @@ pipeline {
       }
     }
 
-    
+
     stage ('e2e tests - cypress') {
       steps {
 
@@ -101,3 +101,4 @@ pipeline {
   }
   */
  }
+}
